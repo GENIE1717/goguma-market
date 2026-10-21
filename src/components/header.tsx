@@ -33,6 +33,12 @@ async function UserMenu() {
         <p className="font-display text-goguma-800">🍠 {profile.nickname}님</p>
         <p className="text-xs text-goguma-500">📍 {profile.neighborhood}</p>
       </div>
+      <Link
+        href="/sell"
+        className="rounded-full border-2 border-goguma-900 bg-flesh-400 px-4 py-2 font-display text-goguma-900 shadow-[3px_3px_0_#3d1638] transition hover:-translate-y-0.5 hover:shadow-[4px_5px_0_#3d1638]"
+      >
+        판매하기
+      </Link>
       <form action={logout}>
         <button
           type="submit"

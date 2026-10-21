@@ -3,6 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // 로그인한 사람은 볼 필요 없는 페이지
 const GUEST_ONLY_PATHS = ["/login", "/signup"];
+// 로그인해야 볼 수 있는 페이지
+const LOGIN_REQUIRED_PATHS = ["/sell"];
 
 // 매 요청마다 실행되어 만료된 로그인 토큰을 새로 고치고 쿠키에 다시 써 준다.
 export async function updateSession(request: NextRequest) {
@@ -31,8 +33,14 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isLoggedIn = Boolean(data?.claims);
 
-  if (isLoggedIn && GUEST_ONLY_PATHS.includes(request.nextUrl.pathname)) {
-    const redirect = NextResponse.redirect(new URL("/", request.url));
+  const { pathname } = request.nextUrl;
+  const target =
+    isLoggedIn && GUEST_ONLY_PATHS.includes(pathname) ? "/"
+    : !isLoggedIn && LOGIN_REQUIRED_PATHS.includes(pathname) ? "/login"
+    : null;
+
+  if (target) {
+    const redirect = NextResponse.redirect(new URL(target, request.url));
     // 갱신된 세션 쿠키를 리다이렉트 응답에도 옮겨 준다.
     response.cookies.getAll().forEach((cookie) => redirect.cookies.set(cookie));
     return redirect;

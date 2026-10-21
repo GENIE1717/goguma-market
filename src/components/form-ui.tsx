@@ -1,4 +1,7 @@
-import type { InputHTMLAttributes } from "react";
+import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+
+const inputClass =
+  "w-full rounded-xl border-2 border-goguma-200 bg-goguma-50/50 px-4 py-3 text-goguma-900 outline-none transition placeholder:text-goguma-300 focus:border-goguma-500 focus:bg-white focus:ring-4 focus:ring-goguma-100";
 
 // 폼에서 반복되는 입력칸 + 라벨
 export function Field({
@@ -9,10 +12,40 @@ export function Field({
   return (
     <label className="block space-y-1.5">
       <span className="font-display text-goguma-800">{label}</span>
-      <input
-        {...props}
-        className="w-full rounded-xl border-2 border-goguma-200 bg-goguma-50/50 px-4 py-3 text-goguma-900 outline-none transition placeholder:text-goguma-300 focus:border-goguma-500 focus:bg-white focus:ring-4 focus:ring-goguma-100"
-      />
+      <input {...props} className={inputClass} />
+      {hint && <span className="block text-xs text-goguma-400">{hint}</span>}
+    </label>
+  );
+}
+
+// 여러 줄 입력칸 + 라벨
+export function TextAreaField({
+  label,
+  hint,
+  ...props
+}: { label: string; hint?: string } & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="font-display text-goguma-800">{label}</span>
+      <textarea {...props} className={`${inputClass} resize-y`} />
+      {hint && <span className="block text-xs text-goguma-400">{hint}</span>}
+    </label>
+  );
+}
+
+// 고르기 칸 + 라벨
+export function SelectField({
+  label,
+  hint,
+  children,
+  ...props
+}: { label: string; hint?: string } & SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <label className="block space-y-1.5">
+      <span className="font-display text-goguma-800">{label}</span>
+      <select {...props} className={inputClass}>
+        {children}
+      </select>
       {hint && <span className="block text-xs text-goguma-400">{hint}</span>}
     </label>
   );

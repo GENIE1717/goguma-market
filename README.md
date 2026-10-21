@@ -14,9 +14,11 @@ npm run dev
 ## 진행 단계
 
 - [x] 1단계: 회원가입 / 로그인 / 로그아웃 (Supabase Auth + `goguma_profiles` 테이블)
-- [ ] 2단계: 상품 등록 · 목록 · 상세
-- [ ] 3단계: 이미지 업로드 (Supabase Storage)
-- [ ] 4단계: 관심(좋아요) · 채팅
+- [x] 2~3단계: 판매글 쓰기 · 목록 · 상세 · 수정 · 삭제
+- [x] 4단계: 판매글 사진 (Supabase Storage), 회원가입 지역 필터, 홈 정리
+- [x] 5단계: 내 정보 · 고구마 온도 · 좋아요 · 신고 · GPS 동네 인증 · 실시간 채팅 · 검색 · 모바일 대응
+
+자세한 현황, 정해 둔 규칙, 남은 일, 새 컴퓨터 준비 방법은 **[docs/HANDOFF.md](docs/HANDOFF.md)** 에 있습니다.
 
 ## 폴더 구조
 
@@ -28,7 +30,7 @@ npm run dev
 | `src/app/auth/actions.ts` | 회원가입 · 로그인 · 로그아웃 Server Action |
 | `src/app/auth/callback/route.ts` | 인증 메일 링크를 눌렀을 때 세션으로 교환 |
 | `src/app/(auth)/` | 로그인 · 회원가입 화면 |
-| `src/components/` | 고구마 · 당근 캐릭터, 배틀, 헤더 등 UI |
+| `src/components/` | 고구마 · 당근 캐릭터, 배경 싸움 장면, 헤더 · 아래 탭 메뉴, 사진 선택, 고구마 온도 등 UI |
 | `supabase/migrations/` | DB 변경 기록 (가계부와 같은 DB 라서 `goguma_` 접두사 사용) |
 
 ## 배포 (Vercel)

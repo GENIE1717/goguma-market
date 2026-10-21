@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import type { ProductFormState } from "@/app/products/actions";
 import { Field, FormMessage, SelectField, SubmitButton, TextAreaField } from "@/components/form-ui";
+import { ImagePicker } from "@/components/image-picker";
 import { CATEGORIES, DESCRIPTION_MAX, PRICE_MAX, TITLE_MAX, type Product } from "@/lib/products";
 
 type ProductAction = (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>;
@@ -14,7 +15,7 @@ export function ProductForm({
   submitLabel,
 }: {
   action: ProductAction;
-  product?: Pick<Product, "title" | "category" | "price" | "description">;
+  product?: Pick<Product, "title" | "category" | "price" | "description" | "images">;
   submitLabel: string;
 }) {
   const [state, formAction, pending] = useActionState<ProductFormState, FormData>(action, {});
@@ -28,6 +29,7 @@ export function ProductForm({
 
   return (
     <form action={formAction} className="space-y-4">
+      <ImagePicker defaultImages={product?.images} />
       <Field
         label="제목"
         name="title"

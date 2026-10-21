@@ -3,7 +3,7 @@ import type { Product } from "@/lib/products";
 
 // 판매자 닉네임·동네도 함께 가져온다 (seller_id → goguma_profiles.id)
 const PRODUCT_COLUMNS =
-  "id, seller_id, title, category, price, description, created_at, seller:goguma_profiles(nickname, neighborhood)";
+  "id, seller_id, title, category, price, description, images, created_at, seller:goguma_profiles(nickname, neighborhood)";
 
 // 최신 판매글 목록
 export async function getProducts(): Promise<Product[]> {

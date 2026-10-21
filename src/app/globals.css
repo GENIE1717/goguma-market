@@ -28,31 +28,16 @@
   --font-display: var(--font-jua);
   --font-sans: var(--font-gowun);
 
-  --animate-float: float 3.2s ease-in-out infinite;
   --animate-wiggle: wiggle 1.2s ease-in-out infinite;
-  --animate-fall: fall linear infinite;
-  --animate-marquee: marquee 28s linear infinite;
   --animate-punch-right: punch-right 1.6s ease-in-out infinite;
   --animate-knockback: knockback 1.6s ease-in-out infinite;
-  --animate-steam: steam 2.4s ease-in-out infinite;
-  --animate-blink: blink 1s steps(2) infinite;
   --animate-pop: pop 1.6s ease-in-out infinite;
+  --animate-flee: flee 2.4s ease-in-out infinite;
+  --animate-meteor: meteor 3s ease-in infinite;
 
-  @keyframes float {
-    0%, 100% { transform: translateY(0) rotate(-3deg); }
-    50% { transform: translateY(-14px) rotate(3deg); }
-  }
   @keyframes wiggle {
     0%, 100% { transform: rotate(-6deg); }
     50% { transform: rotate(6deg); }
-  }
-  @keyframes fall {
-    0% { transform: translateY(-15vh) rotate(0deg); }
-    100% { transform: translateY(115vh) rotate(540deg); }
-  }
-  @keyframes marquee {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-50%); }
   }
   /* 고구마가 오른쪽으로 펀치! */
   @keyframes punch-right {
@@ -72,14 +57,19 @@
     80% { transform: scale(1); opacity: 1; }
     90% { transform: scale(1); opacity: 0; }
   }
-  @keyframes steam {
-    0% { transform: translateY(0) scaleX(1); opacity: 0; }
-    30% { opacity: 0.8; }
-    100% { transform: translateY(-40px) scaleX(1.6); opacity: 0; }
+  /* 당근이 허둥지둥 도망치고 고구마가 쫓아감 */
+  @keyframes flee {
+    0%, 100% { transform: translateX(0) translateY(0); }
+    25% { transform: translateX(-18px) translateY(-6px); }
+    50% { transform: translateX(-36px) translateY(0); }
+    75% { transform: translateX(-18px) translateY(-6px); }
   }
-  @keyframes blink {
-    0% { opacity: 1; }
-    100% { opacity: 0.25; }
+  /* 고구마 메테오가 당근 쪽으로 떨어짐 */
+  @keyframes meteor {
+    0% { transform: translate(-30px, -60px) rotate(-20deg); opacity: 0; }
+    20% { opacity: 1; }
+    80% { transform: translate(10px, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(10px, 0) scale(1.4); opacity: 0; }
   }
 }
 

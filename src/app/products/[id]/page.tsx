@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { getCurrentProfile } from "@/lib/auth";
 import { getProduct } from "@/lib/product-queries";
-import { CATEGORY_EMOJI, formatDate, formatPrice } from "@/lib/products";
+import { CATEGORY_EMOJI, formatDate, formatPrice, imageUrl } from "@/lib/products";
 import { DeleteButton } from "./delete-button";
 
 export const metadata: Metadata = { title: "판매글 | 고구마마켓" };
@@ -18,9 +19,32 @@ async function ProductDetail({ id }: { id: string }) {
 
   return (
     <article className="overflow-hidden rounded-[2rem] border-4 border-goguma-900 bg-white shadow-[8px_8px_0_#3d1638]">
-      <div className="flex aspect-[16/7] items-center justify-center bg-gradient-to-br from-goguma-200 to-flesh-100 text-8xl">
-        {CATEGORY_EMOJI[product.category]}
-      </div>
+      {product.images.length > 0 ? (
+        // 사진이 여러 장이면 옆으로 넘겨 본다
+        <div className="flex snap-x snap-mandatory overflow-x-auto bg-goguma-900">
+          {product.images.map((path, i) => (
+            <div key={path} className="relative aspect-[4/3] w-full shrink-0 snap-center">
+              <Image
+                src={imageUrl(path)}
+                alt={`${product.title} 사진 ${i + 1}`}
+                fill
+                sizes="(min-width: 672px) 672px, 100vw"
+                className="object-contain"
+                priority={i === 0}
+              />
+              {product.images.length > 1 && (
+                <span className="absolute bottom-3 right-3 rounded-full bg-goguma-900/70 px-2.5 py-0.5 text-sm text-white">
+                  {i + 1} / {product.images.length} ▶
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="flex aspect-[16/7] items-center justify-center bg-gradient-to-br from-goguma-200 to-flesh-100 text-8xl">
+          {CATEGORY_EMOJI[product.category]}
+        </div>
+      )}
 
       <div className="space-y-6 p-8 sm:p-10">
         {/* 판매자 */}

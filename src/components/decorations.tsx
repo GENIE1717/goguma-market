@@ -1,80 +1,85 @@
-// 하늘에서 고구마가 쏟아진다 (가끔 당근이 섞여 떨어지며 쫓겨남)
-const DROPS = [
-  { left: 4, delay: 0, duration: 9, size: 28, emoji: "🍠" },
-  { left: 12, delay: 3.5, duration: 11, size: 22, emoji: "🍠" },
-  { left: 21, delay: 1.2, duration: 8, size: 34, emoji: "🍠" },
-  { left: 30, delay: 6, duration: 12, size: 20, emoji: "🥕" },
-  { left: 38, delay: 2.4, duration: 10, size: 26, emoji: "🍠" },
-  { left: 47, delay: 7.5, duration: 9, size: 30, emoji: "🍠" },
-  { left: 55, delay: 0.8, duration: 13, size: 22, emoji: "🍠" },
-  { left: 63, delay: 4.6, duration: 8.5, size: 36, emoji: "🍠" },
-  { left: 71, delay: 2, duration: 11, size: 20, emoji: "🥕" },
-  { left: 79, delay: 5.5, duration: 10, size: 28, emoji: "🍠" },
-  { left: 87, delay: 1.6, duration: 9.5, size: 24, emoji: "🍠" },
-  { left: 95, delay: 8, duration: 12, size: 30, emoji: "🍠" },
-];
+import { Carrot, Goguma } from "@/components/characters";
 
-export function FallingGoguma() {
+// 말풍선
+function Bubble({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {DROPS.map((d, i) => (
-        <span
-          key={i}
-          className="absolute -top-12 animate-fall opacity-60 select-none"
-          style={{
-            left: `${d.left}%`,
-            fontSize: d.size,
-            animationDelay: `${d.delay}s`,
-            animationDuration: `${d.duration}s`,
-            filter: d.emoji === "🥕" ? "grayscale(0.6)" : undefined,
-          }}
-        >
-          {d.emoji}
-        </span>
-      ))}
-    </div>
-  );
-}
-
-const NEWS = [
-  "🚨 [속보] 당근, 고구마밭 기습 침공 실패… \"너무 달아서 접근 불가\"",
-  "📈 [경제] 군고구마 지수 사상 최고치 경신, 당근 주스는 하한가",
-  "⚽ [스포츠] 고구마 FC, 당근 유나이티드에 7:0 대승",
-  "☃️ [날씨] 전국 군고구마 굽기 딱 좋은 날씨, 당근은 실내 대기 권고",
-  "🐰 [단독] 토끼들 \"사실 고구마도 좋아해요\" 충격 고백",
-  "🔥 [생활] 겨울철 이웃과 고구마 나누기, 정(情) 지수 300% 상승",
-];
-
-// 뉴스 속보 띠 (무한 스크롤)
-export function NewsTicker() {
-  const items = [...NEWS, ...NEWS];
-  return (
-    <div className="relative overflow-hidden border-y-4 border-goguma-900 bg-flesh-300 py-2.5">
-      <div className="absolute inset-y-0 left-0 z-10 flex items-center bg-goguma-700 px-4 font-display text-lg text-flesh-200 shadow-[6px_0_10px_rgba(0,0,0,0.25)]">
-        고구마 뉴스
-      </div>
-      <div className="flex w-max animate-marquee gap-12 pl-40 whitespace-nowrap font-display text-lg text-goguma-900">
-        {items.map((n, i) => (
-          <span key={i}>{n}</span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// 위아래 섹션을 이어 주는 고구마 껍질 물결
-export function Wave({ fill, flip = false }: { fill: string; flip?: boolean }) {
-  return (
-    <svg
-      aria-hidden
-      viewBox="0 0 1200 60"
-      preserveAspectRatio="none"
-      className={`block h-10 w-full ${flip ? "rotate-180" : ""}`}
+    <span
+      className={`absolute whitespace-nowrap rounded-lg border-2 border-goguma-900 bg-white px-1.5 py-0.5 font-display text-[11px] leading-tight text-goguma-900 ${className}`}
     >
-      <path
-        d="M0 30 Q 75 0 150 30 T 300 30 T 450 30 T 600 30 T 750 30 T 900 30 T 1050 30 T 1200 30 V60 H0 Z"
-        fill={fill}
-      />
-    </svg>
+      {children}
+    </span>
+  );
+}
+
+// 화면 양옆 여백이 넉넉할 때(넓은 화면)만 보이는 싸움
+const SIDE = "hidden min-[1360px]:flex";
+
+// 홈 배경 군데군데에서 벌어지는 작은 고구마 vs 당근 싸움들
+// 화면 뒤에 깔리기만 하고 클릭은 막지 않는다
+export function BattleBackground() {
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden select-none">
+      {/* 1. 고구마 펀치에 당근이 튕겨 나감 */}
+      <div className={`${SIDE} absolute left-[1%] top-[14%] items-end opacity-60`}>
+        <div className="animate-punch-right">
+          <Goguma mood="angry" fist className="w-20" />
+        </div>
+        <span className="animate-pop absolute left-16 top-0 text-xl">💥</span>
+        <div className="animate-knockback origin-bottom">
+          <Carrot mood="defeated" className="h-14" />
+        </div>
+        <Bubble className="-top-5 left-0">당근 OUT!</Bubble>
+      </div>
+
+      {/* 2. 백기 들고 도망치는 당근, 뒤쫓는 고구마 */}
+      <div className={`${SIDE} absolute right-[1%] top-[28%] opacity-60`}>
+        <div className="animate-flee flex items-end gap-1">
+          <div className="relative">
+            <Carrot mood="angry" className="h-14 -scale-x-100" />
+            <span className="absolute -left-3 -top-2 text-lg">🏳️</span>
+            <span className="absolute -right-2 top-1 text-sm">💦</span>
+            <Bubble className="-top-6 left-2">항복…!</Bubble>
+          </div>
+          <Goguma mood="angry" className="w-16 -scale-x-100" />
+        </div>
+      </div>
+
+      {/* 3. K.O. 당한 당근 옆에서 선글라스 고구마 */}
+      <div className={`${SIDE} absolute left-[1%] top-[48%] items-end gap-1 opacity-60`}>
+        <Goguma mood="cool" className="w-20 animate-wiggle" />
+        <div className="relative">
+          <Carrot mood="defeated" className="h-14 rotate-90" />
+          <span className="absolute -top-3 left-3 text-sm">💫</span>
+        </div>
+        <Bubble className="-top-5 left-14 text-carrot-500">K.O.</Bubble>
+      </div>
+
+      {/* 4. 몰래 판매글 올리려는 당근, 막아서는 고구마 */}
+      <div className={`${SIDE} absolute right-[1%] top-[62%] items-end gap-1 opacity-60`}>
+        <Carrot mood="sneaky" className="h-14 rotate-[-12deg]" />
+        <Goguma mood="angry" className="w-16 -scale-x-100" />
+        <span className="absolute -top-4 right-4 text-lg">🚫</span>
+        <Bubble className="-top-6 left-0">나도 팔래…</Bubble>
+      </div>
+
+      {/* 5. 하늘에서 떨어지는 고구마 메테오 (어느 화면에서나 맨 아래 빈 곳에) */}
+      <div className="absolute bottom-6 left-[4%] flex items-end gap-2 opacity-60">
+        <span className="animate-meteor text-2xl">☄️🍠</span>
+        <Carrot mood="angry" className="h-14 animate-wiggle" />
+        <Bubble className="-top-5 left-8">어어어…?!</Bubble>
+      </div>
+
+      {/* 6. 좁은 화면에서도 보이는 펀치 한 방 (맨 아래 오른쪽) */}
+      <div className="absolute bottom-6 right-[4%] flex items-end opacity-60 min-[1360px]:hidden">
+        <div className="animate-punch-right">
+          <Goguma mood="angry" fist className="w-16" />
+        </div>
+        <span className="animate-pop absolute left-12 top-0 text-lg">💥</span>
+        <div className="animate-knockback origin-bottom">
+          <Carrot mood="defeated" className="h-12" />
+        </div>
+        <Bubble className="-top-5 left-0">당근 OUT!</Bubble>
+      </div>
+    </div>
   );
 }

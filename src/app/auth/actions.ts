@@ -3,6 +3,7 @@
 import type { AuthError } from "@supabase/supabase-js";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { isValidRegion } from "@/lib/regions";
 import { createClient } from "@/lib/supabase/server";
 
 // useActionState 로 폼에 돌려줄 상태
@@ -47,12 +48,14 @@ export async function signup(_prev: AuthState, formData: FormData): Promise<Auth
   const password = String(formData.get("password") ?? "");
   const passwordConfirm = String(formData.get("passwordConfirm") ?? "");
   const nickname = text(formData, "nickname");
-  const neighborhood = text(formData, "neighborhood");
+  const sido = text(formData, "sido");
+  const sgg = text(formData, "sgg");
+  const dong = text(formData, "dong");
   const notCarrot = formData.get("notCarrot") === "on";
-  const fields = { email, nickname, neighborhood };
+  const fields = { email, nickname, sido, sgg, dong };
 
   // 서버에서도 꼭 다시 검사한다 (브라우저 검사는 우회할 수 있음)
-  if (!email || !password || !nickname || !neighborhood) {
+  if (!email || !password || !nickname || !sido || !sgg || !dong) {
     return { error: "빈칸을 모두 채워 주세요.", fields };
   }
   if (password.length < 6) {
@@ -64,9 +67,10 @@ export async function signup(_prev: AuthState, formData: FormData): Promise<Auth
   if (nickname.length < 2 || nickname.length > 12) {
     return { error: "닉네임은 2~12자로 지어 주세요.", fields };
   }
-  if (neighborhood.length > 20) {
-    return { error: "동네 이름은 20자 이내로 적어 주세요.", fields };
+  if (!isValidRegion(sido, sgg, dong)) {
+    return { error: "동네를 시/도 → 시/군/구 → 읍/면/동 순서로 다시 골라 주세요.", fields };
   }
+  const neighborhood = `${sido} ${sgg} ${dong}`;
   if (!notCarrot) {
     return { error: "🥕 당근은 가입할 수 없어요. '저는 당근이 아닙니다'에 체크해 주세요.", fields };
   }

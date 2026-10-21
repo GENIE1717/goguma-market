@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type AuthState } from "@/app/auth/actions";
 import { Field, FormMessage, SubmitButton } from "@/components/form-ui";
+import { RegionSelect } from "./region-select";
 
 export function SignupForm() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(signup, {});
@@ -53,27 +54,17 @@ export function SignupForm() {
           required
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field
-          label="닉네임"
-          name="nickname"
-          placeholder="달콤한호박고구마"
-          minLength={2}
-          maxLength={12}
-          defaultValue={state.fields?.nickname}
-          hint="2~12자"
-          required
-        />
-        <Field
-          label="우리 동네"
-          name="neighborhood"
-          placeholder="고구마동"
-          maxLength={20}
-          defaultValue={state.fields?.neighborhood}
-          hint="예: 역삼동, 고구마동"
-          required
-        />
-      </div>
+      <Field
+        label="닉네임"
+        name="nickname"
+        placeholder="달콤한호박고구마"
+        minLength={2}
+        maxLength={12}
+        defaultValue={state.fields?.nickname}
+        hint="2~12자"
+        required
+      />
+      <RegionSelect defaultValue={state.fields} />
 
       {/* 캡차 대신 당근 판별기 */}
       <label className="flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed border-carrot-400 bg-flesh-100 px-4 py-3">

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Goguma } from "@/components/characters";
 import { getCurrentProfile } from "@/lib/auth";
+import { shortRegion } from "@/lib/regions";
 import { logout } from "@/app/auth/actions";
 
 // 로그인 상태에 따라 바뀌는 오른쪽 영역 (쿠키를 읽으므로 Suspense 안에서 렌더링)
@@ -31,7 +32,7 @@ async function UserMenu() {
     <div className="flex items-center gap-2 sm:gap-3">
       <div className="hidden text-right leading-tight sm:block">
         <p className="font-display text-goguma-800">🍠 {profile.nickname}님</p>
-        <p className="text-xs text-goguma-500">📍 {profile.neighborhood}</p>
+        <p className="text-xs text-goguma-500">📍 {shortRegion(profile.neighborhood)}</p>
       </div>
       <Link
         href="/sell"

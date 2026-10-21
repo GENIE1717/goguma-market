@@ -1,6 +1,8 @@
+import Image from "next/image";
 import Link from "next/link";
 import { getProducts } from "@/lib/product-queries";
-import { CATEGORY_EMOJI, formatPrice } from "@/lib/products";
+import { CATEGORY_EMOJI, formatPrice, imageUrl } from "@/lib/products";
+import { shortRegion } from "@/lib/regions";
 
 // 카드 배경을 돌아가며 칠한다
 const CARD_BGS = [
@@ -39,14 +41,29 @@ export async function ProductList() {
             className="group block overflow-hidden rounded-3xl border-4 border-goguma-900 bg-white shadow-[5px_5px_0_#3d1638] transition hover:-translate-y-1 hover:rotate-[-1deg]"
           >
             <div
-              className={`flex aspect-[4/3] items-center justify-center bg-gradient-to-br ${CARD_BGS[i % CARD_BGS.length]} text-6xl transition group-hover:scale-105`}
+              className={`relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br ${CARD_BGS[i % CARD_BGS.length]} text-6xl`}
             >
-              {CATEGORY_EMOJI[product.category]}
+              {product.images[0] ? (
+                <Image
+                  src={imageUrl(product.images[0])}
+                  alt={product.title}
+                  fill
+                  sizes="(min-width: 768px) 33vw, 50vw"
+                  className="object-cover transition group-hover:scale-105"
+                />
+              ) : (
+                <span className="transition group-hover:scale-110">{CATEGORY_EMOJI[product.category]}</span>
+              )}
+              {product.images.length > 1 && (
+                <span className="absolute bottom-2 right-2 rounded-full bg-goguma-900/70 px-2 py-0.5 text-xs text-white">
+                  📷 {product.images.length}
+                </span>
+              )}
             </div>
             <div className="space-y-1 p-4">
               <p className="line-clamp-1 font-display text-lg text-goguma-900">{product.title}</p>
               <p className="text-sm text-goguma-400">
-                📍 {product.seller?.neighborhood ?? "고구마동"} · {product.category}
+                📍 {shortRegion(product.seller?.neighborhood ?? "고구마동")} · {product.category}
               </p>
               <p className="font-display text-xl text-goguma-700">{formatPrice(product.price)}</p>
             </div>

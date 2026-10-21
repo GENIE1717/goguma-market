@@ -3,8 +3,8 @@ import { NextResponse, type NextRequest } from "next/server";
 
 // 로그인한 사람은 볼 필요 없는 페이지
 const GUEST_ONLY_PATHS = ["/login", "/signup"];
-// 로그인해야 볼 수 있는 페이지
-const LOGIN_REQUIRED_PATHS = ["/sell"];
+// 로그인해야 볼 수 있는 페이지 (글쓰기, 글 수정)
+const LOGIN_REQUIRED_PATHS = [/^\/sell$/, /^\/products\/[^/]+\/edit$/];
 
 // 매 요청마다 실행되어 만료된 로그인 토큰을 새로 고치고 쿠키에 다시 써 준다.
 export async function updateSession(request: NextRequest) {
@@ -36,7 +36,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const target =
     isLoggedIn && GUEST_ONLY_PATHS.includes(pathname) ? "/"
-    : !isLoggedIn && LOGIN_REQUIRED_PATHS.includes(pathname) ? "/login"
+    : !isLoggedIn && LOGIN_REQUIRED_PATHS.some((path) => path.test(pathname)) ? "/login"
     : null;
 
   if (target) {

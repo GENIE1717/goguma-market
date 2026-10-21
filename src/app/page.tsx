@@ -3,17 +3,8 @@ import { Suspense } from "react";
 import { BattleArena } from "@/components/battle-arena";
 import { Carrot, Goguma } from "@/components/characters";
 import { FallingGoguma, NewsTicker, Wave } from "@/components/decorations";
+import { ProductList, ProductListSkeleton } from "@/components/product-list";
 import { getCurrentProfile } from "@/lib/auth";
-
-// 예시 매물 — 상품 기능은 다음 단계에서 DB로 옮길 예정
-const SAMPLE_ITEMS = [
-  { emoji: "🍠", title: "해남 꿀고구마 1박스 (3kg)", place: "고구마동", price: 15000, likes: 42, bg: "from-goguma-200 to-goguma-100" },
-  { emoji: "🔥", title: "군고구마 기계 거의 새것", place: "군밤로", price: 89000, likes: 17, bg: "from-flesh-300 to-flesh-100" },
-  { emoji: "🛋️", title: "고구마 모양 대형 쿠션", place: "호박동", price: 12000, likes: 33, bg: "from-goguma-300 to-flesh-200" },
-  { emoji: "🚫🥕", title: "당근 퇴치 스프레이 (효과 확실)", place: "밤고구마리", price: 4900, likes: 128, bg: "from-carrot-400/40 to-flesh-100" },
-  { emoji: "🌱", title: "밤고구마 모종 10주", place: "자색동", price: 8000, likes: 9, bg: "from-leaf-500/30 to-flesh-100" },
-  { emoji: "🍯", title: "수제 고구마 말랭이 500g", place: "고구마동", price: 6500, likes: 56, bg: "from-flesh-400 to-flesh-100" },
-];
 
 const SPEC = [
   { label: "당도", goguma: "🍯🍯🍯🍯🍯", carrot: "🍯", win: "goguma" },
@@ -24,8 +15,8 @@ const SPEC = [
 ];
 
 // 로그인 여부에 따라 바뀌는 히어로 버튼 영역
-async function HeroActions({ searchParams }: { searchParams: Promise<{ welcome?: string }> }) {
-  const [profile, { welcome }] = await Promise.all([getCurrentProfile(), searchParams]);
+async function HeroActions({ searchParams }: { searchParams: Promise<{ welcome?: string; deleted?: string }> }) {
+  const [profile, { welcome, deleted }] = await Promise.all([getCurrentProfile(), searchParams]);
 
   if (profile) {
     return (
@@ -35,10 +26,15 @@ async function HeroActions({ searchParams }: { searchParams: Promise<{ welcome?:
             🎉 고구마 가족이 된 걸 환영해요!
           </p>
         )}
+        {deleted && (
+          <p className="inline-block rounded-full bg-white/20 px-4 py-1 font-display text-white">
+            🗑️ 판매글을 삭제했어요.
+          </p>
+        )}
         <p className="font-display text-2xl text-flesh-200">
           {profile.nickname}님, 오늘도 달콤한 하루 보내세요 🍠
         </p>
-        <p className="text-goguma-100">📍 {profile.neighborhood}의 따끈한 매물이 곧 올라와요. (거래 기능은 다음 단계에서!)</p>
+        <p className="text-goguma-100">📍 {profile.neighborhood}의 따끈한 매물을 구경하거나 직접 올려 보세요.</p>
       </div>
     );
   }
@@ -114,37 +110,25 @@ export default function Home({ searchParams }: PageProps<"/">) {
 
       <NewsTicker />
 
-      {/* 예시 매물 */}
+      {/* 판매글 목록 */}
       <section className="bg-goguma-dots px-4 py-14">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-wrap items-end justify-between gap-2">
             <div>
               <h2 className="font-display text-3xl text-goguma-800 sm:text-4xl">🔥 지금 동네에서 뜨끈한 매물</h2>
-              <p className="mt-1 text-goguma-500">예시 매물이에요 · 진짜 거래 기능은 다음 단계에서 오픈!</p>
+              <p className="mt-1 text-goguma-500">이웃들이 방금 올린 판매글이에요.</p>
             </div>
-            <span className="rounded-full bg-goguma-100 px-3 py-1 font-display text-sm text-goguma-700">🍠 준비 중</span>
+            <Link
+              href="/sell"
+              className="rounded-full border-2 border-goguma-900 bg-flesh-400 px-4 py-1.5 font-display text-goguma-900 shadow-[3px_3px_0_#3d1638] transition hover:-translate-y-0.5"
+            >
+              ✏️ 판매글 쓰기
+            </Link>
           </div>
 
-          <ul className="mt-8 grid grid-cols-2 gap-4 sm:gap-6 md:grid-cols-3">
-            {SAMPLE_ITEMS.map((item) => (
-              <li
-                key={item.title}
-                className="group overflow-hidden rounded-3xl border-4 border-goguma-900 bg-white shadow-[5px_5px_0_#3d1638] transition hover:-translate-y-1 hover:rotate-[-1deg]"
-              >
-                <div className={`flex aspect-[4/3] items-center justify-center bg-gradient-to-br ${item.bg} text-6xl transition group-hover:scale-105`}>
-                  {item.emoji}
-                </div>
-                <div className="space-y-1 p-4">
-                  <p className="line-clamp-1 font-display text-lg text-goguma-900">{item.title}</p>
-                  <p className="text-sm text-goguma-400">📍 {item.place}</p>
-                  <div className="flex items-center justify-between">
-                    <p className="font-display text-xl text-goguma-700">{item.price.toLocaleString("ko-KR")}원</p>
-                    <p className="text-sm text-goguma-400">💜 {item.likes}</p>
-                  </div>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <Suspense fallback={<ProductListSkeleton />}>
+            <ProductList />
+          </Suspense>
         </div>
       </section>
 

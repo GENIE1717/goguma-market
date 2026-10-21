@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { SellForm } from "./sell-form";
+import { createProduct } from "@/app/products/actions";
+import { ProductForm } from "@/components/product-form";
 
 export const metadata: Metadata = { title: "판매글 쓰기 | 고구마마켓" };
 
@@ -13,7 +14,7 @@ export default function SellPage() {
           <h1 className="font-display text-4xl text-goguma-800">내 물건 팔기</h1>
           <p className="mt-1 text-goguma-500">우리 동네 이웃에게 달콤하게 소개해 주세요. 🍠</p>
         </div>
-        <SellForm />
+        <ProductForm action={createProduct} submitLabel="판매글 올리기 🍠" />
       </div>
     </div>
   );

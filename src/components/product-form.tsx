@@ -1,32 +1,30 @@
 "use client";
 
-import Link from "next/link";
 import { useActionState } from "react";
-import { createProduct, type SellState } from "./actions";
+import type { ProductFormState } from "@/app/products/actions";
 import { Field, FormMessage, SelectField, SubmitButton, TextAreaField } from "@/components/form-ui";
-import { CATEGORIES, DESCRIPTION_MAX, PRICE_MAX, TITLE_MAX } from "@/lib/products";
+import { CATEGORIES, DESCRIPTION_MAX, PRICE_MAX, TITLE_MAX, type Product } from "@/lib/products";
 
-export function SellForm() {
-  const [state, formAction, pending] = useActionState<SellState, FormData>(createProduct, {});
+type ProductAction = (prev: ProductFormState, formData: FormData) => Promise<ProductFormState>;
 
-  // 등록에 성공하면 폼 대신 완료 안내만 보여 준다
-  if (state.done) {
-    const { title, price } = state.done;
-    return (
-      <div className="space-y-4 text-center">
-        <p className="text-6xl">🎉🍠</p>
-        <FormMessage
-          message={`'${title}' (${price === 0 ? "나눔" : `${price.toLocaleString()}원`}) 판매글이 올라갔어요!`}
-        />
-        <Link
-          href="/"
-          className="inline-block font-display text-goguma-700 underline decoration-flesh-400 decoration-4 underline-offset-4"
-        >
-          홈으로 가기
-        </Link>
-      </div>
-    );
-  }
+// 글쓰기·수정에서 같이 쓰는 판매글 폼. 저장에 성공하면 서버가 상세 페이지로 보내 준다.
+export function ProductForm({
+  action,
+  product,
+  submitLabel,
+}: {
+  action: ProductAction;
+  product?: Pick<Product, "title" | "category" | "price" | "description">;
+  submitLabel: string;
+}) {
+  const [state, formAction, pending] = useActionState<ProductFormState, FormData>(action, {});
+  // 에러로 돌아왔으면 방금 적은 값, 아니면 원래 글 내용
+  const values = state.fields ?? {
+    title: product?.title ?? "",
+    category: product?.category ?? "",
+    price: product ? String(product.price) : "",
+    description: product?.description ?? "",
+  };
 
   return (
     <form action={formAction} className="space-y-4">
@@ -36,12 +34,12 @@ export function SellForm() {
         placeholder="예: 해남 꿀고구마 1박스 (3kg)"
         minLength={2}
         maxLength={TITLE_MAX}
-        defaultValue={state.fields?.title}
+        defaultValue={values.title}
         hint={`2~${TITLE_MAX}자`}
         required
       />
       <div className="grid gap-4 sm:grid-cols-2">
-        <SelectField label="카테고리" name="category" defaultValue={state.fields?.category ?? ""} required>
+        <SelectField label="카테고리" name="category" defaultValue={values.category} required>
           <option value="" disabled>
             골라 주세요
           </option>
@@ -60,7 +58,7 @@ export function SellForm() {
           max={PRICE_MAX}
           step={1}
           placeholder="15000"
-          defaultValue={state.fields?.price}
+          defaultValue={values.price}
           hint="0원으로 적으면 '나눔'이에요 🎁"
           required
         />
@@ -72,14 +70,14 @@ export function SellForm() {
         placeholder={"상품 상태, 구매 시기, 거래 장소 등을 적어 주세요.\n달콤하게 적을수록 잘 팔려요 🍯"}
         minLength={10}
         maxLength={DESCRIPTION_MAX}
-        defaultValue={state.fields?.description}
+        defaultValue={values.description}
         hint={`10~${DESCRIPTION_MAX}자`}
         required
       />
 
       <FormMessage error={state.error} />
 
-      <SubmitButton pending={pending}>판매글 올리기 🍠</SubmitButton>
+      <SubmitButton pending={pending}>{submitLabel}</SubmitButton>
     </form>
   );
 }

@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🍠 고구마마켓
 
-## Getting Started
+당근마켓을 따라 만드는 공부용 동네 중고거래 사이트 (Next.js 16 + Supabase)
 
-First, run the development server:
+## 실행
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`.env.local` 이 필요합니다. 형식은 `.env.example` 참고.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 진행 단계
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- [x] 1단계: 회원가입 / 로그인 / 로그아웃 (Supabase Auth + `goguma_profiles` 테이블)
+- [ ] 2단계: 상품 등록 · 목록 · 상세
+- [ ] 3단계: 이미지 업로드 (Supabase Storage)
+- [ ] 4단계: 관심(좋아요) · 채팅
 
-## Learn More
+## 폴더 구조
 
-To learn more about Next.js, take a look at the following resources:
+| 경로 | 역할 |
+| --- | --- |
+| `src/proxy.ts` | 매 요청마다 로그인 토큰 갱신 (Next 16 에서 middleware → proxy 로 이름 변경) |
+| `src/lib/supabase/` | 브라우저용 / 서버용 / proxy용 Supabase 클라이언트 |
+| `src/lib/auth.ts` | 현재 로그인한 사용자의 프로필 가져오기 |
+| `src/app/auth/actions.ts` | 회원가입 · 로그인 · 로그아웃 Server Action |
+| `src/app/auth/callback/route.ts` | 인증 메일 링크를 눌렀을 때 세션으로 교환 |
+| `src/app/(auth)/` | 로그인 · 회원가입 화면 |
+| `src/components/` | 고구마 · 당근 캐릭터, 배틀, 헤더 등 UI |
+| `supabase/migrations/` | DB 변경 기록 (가계부와 같은 DB 라서 `goguma_` 접두사 사용) |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 배포 시 할 일
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. 배포 플랫폼에 `.env.example` 의 환경 변수 3개 등록 (`NEXT_PUBLIC_SITE_URL` 은 배포 주소로)
+2. Supabase 대시보드 → Authentication → URL Configuration → Redirect URLs 에 `https://배포주소/**` 추가

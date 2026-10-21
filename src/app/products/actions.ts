@@ -1,11 +1,13 @@
 "use server";
 
+import { refresh } from "next/cache";
 import { redirect } from "next/navigation";
+import { BUCKETS, isMyImagePath } from "@/lib/images";
 import { createClient } from "@/lib/supabase/server";
 import {
+  BUMP_COOLDOWN_HOURS,
   CATEGORIES,
   DESCRIPTION_MAX,
-  IMAGE_BUCKET,
   IMAGE_MAX,
   PRICE_MAX,
   TITLE_MAX,
@@ -19,9 +21,6 @@ export type ProductFormState = {
 };
 
 type ProductInput = { title: string; category: Category; price: number; description: string; images: string[] };
-
-// ImagePicker 가 만든 경로 모양: "<글쓴이 id>/<랜덤 id>.<확장자>"
-const IMAGE_PATH = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp|gif)$/;
 
 function text(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -58,7 +57,7 @@ function parseProductForm(formData: FormData, userId: string): { input: ProductI
   if (images.length > IMAGE_MAX) {
     return { error: `사진은 최대 ${IMAGE_MAX}장까지예요.`, fields };
   }
-  if (images.some((path) => !IMAGE_PATH.test(path) || !path.startsWith(`${userId}/`))) {
+  if (images.some((path) => !isMyImagePath(path, userId))) {
     return { error: "사진 정보가 이상해요. 사진을 다시 올려 주세요.", fields };
   }
 
@@ -110,7 +109,7 @@ export async function updateProduct(
   if (data.length === 0) return { error: "내가 쓴 글만 고칠 수 있어요." };
 
   const removed = (before?.images ?? []).filter((path: string) => !parsed.input.images.includes(path));
-  if (removed.length > 0) await supabase.storage.from(IMAGE_BUCKET).remove(removed);
+  if (removed.length > 0) await supabase.storage.from(BUCKETS.product).remove(removed);
 
   redirect(`/products/${id}`);
 }
@@ -124,7 +123,82 @@ export async function deleteProduct(id: number) {
   // RLS 때문에 남의 글은 지워지지 않는다. 지운 글의 사진도 함께 지운다.
   const { data } = await supabase.from("goguma_products").delete().eq("id", id).select("images");
   const images = data?.flatMap((row) => row.images as string[]) ?? [];
-  if (images.length > 0) await supabase.storage.from(IMAGE_BUCKET).remove(images);
+  if (images.length > 0) await supabase.storage.from(BUCKETS.product).remove(images);
 
   redirect("/?deleted=1");
+}
+
+// 좋아요 누르기/취소 (내 글에는 DB 규칙 때문에 못 누른다)
+export async function toggleLike(productId: number): Promise<{ error?: string }> {
+  const session = await loggedIn();
+  if (!session) redirect("/login");
+  const { supabase, userId } = session;
+
+  const { count } = await supabase
+    .from("goguma_likes")
+    .select("*", { count: "exact", head: true })
+    .eq("product_id", productId)
+    .eq("user_id", userId);
+
+  const { error } = count
+    ? await supabase.from("goguma_likes").delete().eq("product_id", productId).eq("user_id", userId)
+    : await supabase.from("goguma_likes").insert({ product_id: productId });
+  if (error) return { error: "내 글에는 좋아요를 누를 수 없어요. 🍠" };
+
+  refresh();
+  return {};
+}
+
+// 다시 굽기(끌어올리기): 목록 맨 위로. 하루에 한 번.
+export async function bumpProduct(productId: number): Promise<{ error?: string }> {
+  const session = await loggedIn();
+  if (!session) redirect("/login");
+  const { supabase } = session;
+
+  const { data: product } = await supabase.from("goguma_products").select("bumped_at").eq("id", productId).single();
+  if (!product) return { error: "판매글을 찾을 수 없어요." };
+  const hours = (Date.now() - new Date(product.bumped_at).getTime()) / 3_600_000;
+  if (hours < BUMP_COOLDOWN_HOURS) {
+    return { error: `고구마가 아직 뜨거워요! ${Math.ceil(BUMP_COOLDOWN_HOURS - hours)}시간 뒤에 다시 구울 수 있어요. 🔥` };
+  }
+
+  // 남의 글이면 RLS 때문에 바뀌지 않는다
+  const { data } = await supabase
+    .from("goguma_products")
+    .update({ bumped_at: new Date().toISOString() })
+    .eq("id", productId)
+    .select("id");
+  if (!data?.length) return { error: "내 글만 다시 구울 수 있어요." };
+
+  refresh();
+  return {};
+}
+
+// 판매자와 채팅 시작: 이미 방이 있으면 그 방으로, 없으면 새로 만든다
+export async function startChat(productId: number) {
+  const session = await loggedIn();
+  if (!session) redirect("/login");
+  const { supabase, userId } = session;
+
+  const { data: product } = await supabase.from("goguma_products").select("seller_id").eq("id", productId).single();
+  if (!product) redirect("/");
+  // 내 글이면 채팅 목록으로
+  if (product.seller_id === userId) redirect("/chats");
+
+  const { data: existing } = await supabase
+    .from("goguma_chat_rooms")
+    .select("id")
+    .eq("product_id", productId)
+    .eq("buyer_id", userId)
+    .maybeSingle();
+  if (existing) redirect(`/chats/${existing.id}`);
+
+  const { data: room, error } = await supabase
+    .from("goguma_chat_rooms")
+    .insert({ product_id: productId, seller_id: product.seller_id })
+    .select("id")
+    .single();
+  if (error || !room) redirect(`/products/${productId}`);
+
+  redirect(`/chats/${room.id}`);
 }

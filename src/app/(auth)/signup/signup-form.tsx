@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useActionState } from "react";
 import { signup, type AuthState } from "@/app/auth/actions";
 import { Field, FormMessage, SubmitButton } from "@/components/form-ui";
-import { RegionSelect } from "./region-select";
+import { RegionSelect } from "@/components/region-select";
 
 export function SignupForm() {
   const [state, formAction, pending] = useActionState<AuthState, FormData>(signup, {});

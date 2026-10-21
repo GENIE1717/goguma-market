@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Suspense } from "react";
+import { CategoryChips } from "@/components/category-chips";
 import { BattleBackground } from "@/components/decorations";
 import { ProductList, ProductListSkeleton } from "@/components/product-list";
 import { getCurrentProfile } from "@/lib/auth";
@@ -49,6 +50,10 @@ export default function Home({ searchParams }: PageProps<"/">) {
           >
             ✏️ 판매글 쓰기
           </Link>
+        </div>
+
+        <div className="mt-5">
+          <CategoryChips />
         </div>
 
         <Suspense fallback={<ProductListSkeleton />}>

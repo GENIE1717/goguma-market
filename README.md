@@ -31,7 +31,14 @@ npm run dev
 | `src/components/` | 고구마 · 당근 캐릭터, 배틀, 헤더 등 UI |
 | `supabase/migrations/` | DB 변경 기록 (가계부와 같은 DB 라서 `goguma_` 접두사 사용) |
 
-## 배포 시 할 일
+## 배포 (Vercel)
 
-1. 배포 플랫폼에 `.env.example` 의 환경 변수 3개 등록 (`NEXT_PUBLIC_SITE_URL` 은 배포 주소로)
-2. Supabase 대시보드 → Authentication → URL Configuration → Redirect URLs 에 `https://배포주소/**` 추가
+배포 주소: https://goguma-market-opal.vercel.app
+
+```bash
+vercel deploy --prod
+```
+
+- 환경 변수 3개(`.env.example` 참고)는 Vercel 프로젝트에 등록돼 있다. `NEXT_PUBLIC_SITE_URL` 은 위 배포 주소.
+- `vercel.json` 에 `"framework": "nextjs"` 를 적어 둬야 한다 (없으면 "Other"로 잡혀 404).
+- 이메일 인증을 켜면 Supabase 대시보드 → Authentication → URL Configuration → Redirect URLs 에 `https://goguma-market-opal.vercel.app/**` 추가
